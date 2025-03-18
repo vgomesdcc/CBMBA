@@ -1,0 +1,133 @@
+import unicodedata
+
+def remover_acentos(texto):
+    """Remove os acentos de uma string."""
+    return ''.join(
+        c for c in unicodedata.normalize('NFD', texto) 
+        if unicodedata.category(c) != 'Mn'
+    )
+
+def classificar_imovel(nome, h, ac, ci, leitos=None):
+    """
+    Classifica o imóvel com base no nome, altura, área construída e coeficiente de incêndio.
+    
+    Parâmetros:
+    nome - Nome do imóvel
+    h - Altura do imóvel (em metros)
+    ac - Área construída (em m²)
+    ci - Coeficiente de incêndio
+    leitos - Quantidade de leitos (opcional, para categorias como A-3 e B-1)
+
+    Retorna:
+    Classificações detalhadas.
+    """
+    # Normalizar o nome (remover acentos e tornar minúsculo)
+    nome_normalizado = remover_acentos(nome.lower())
+
+    # Classificação do tipo de imóvel com base no nome (usando termos específicos)
+    if "casa" in nome_normalizado or "casa terrea" in nome_normalizado or "casa assobrada" in nome_normalizado:
+        tipo = "A-1"
+    elif "apartamento" in nome_normalizado:
+        tipo = "A-2"
+    elif "pensionato" in nome_normalizado or "internato" in nome_normalizado or "alojamento" in nome_normalizado:
+        if leitos is not None and leitos <= 16:
+            tipo = "A-3"
+        else:
+            tipo = "B-1"
+    elif "hotel" in nome_normalizado or "motel" in nome_normalizado or "pousada" in nome_normalizado:
+        tipo = "B-1"
+    elif "flat" in nome_normalizado or "apart-hotel" in nome_normalizado:
+        tipo = "B-2"
+    elif "metal" in nome_normalizado or "louca" in nome_normalizado or "artigos hospitalares" in nome_normalizado:
+        tipo = "C-1"
+    elif "loja" in nome_normalizado or "supermercado" in nome_normalizado or "mercado" in nome_normalizado:
+        tipo = "C-2"
+    elif "shopping" in nome_normalizado:
+        tipo = "C-3"
+    elif "escritorio" in nome_normalizado or "servico profissional" in nome_normalizado:
+        tipo = "D-1"
+    elif "banco" in nome_normalizado:
+        tipo = "D-2"
+    elif "reparacao" in nome_normalizado or "lavanderia" in nome_normalizado:
+        tipo = "D-3"
+    elif "laboratorio" in nome_normalizado:
+        tipo = "D-4"
+    elif "escola" in nome_normalizado and "especial" in nome_normalizado:
+        tipo = "E-2"
+    elif "escola" in nome_normalizado:
+        tipo = "E-1"
+    elif "academia" in nome_normalizado or "esporte" in nome_normalizado:
+        tipo = "E-3"
+    elif "treinamento profissional" in nome_normalizado:
+        tipo = "E-4"
+    elif "creche" in nome_normalizado or "pre-escola" in nome_normalizado:
+        tipo = "E-5"
+    elif "deficiente" in nome_normalizado or "excepcional" in nome_normalizado:
+        tipo = "E-6"
+    elif "museu" in nome_normalizado or "galeria" in nome_normalizado or "biblioteca" in nome_normalizado:
+        tipo = "F-1"
+    elif "igreja" in nome_normalizado or "templo" in nome_normalizado or "cemiterio" in nome_normalizado:
+        tipo = "F-2"
+    elif "arena" in nome_normalizado or "estadio" in nome_normalizado:
+        tipo = "F-3"
+    elif "estacao" in nome_normalizado or "terminal" in nome_normalizado:
+        tipo = "F-4"
+    elif "teatro" in nome_normalizado or "cinema" in nome_normalizado:
+        tipo = "F-5"
+    elif "boate" in nome_normalizado or "clube" in nome_normalizado or "salao" in nome_normalizado:
+        tipo = "F-6"
+    elif "circo" in nome_normalizado:
+        tipo = "F-7"
+    elif "restaurante" in nome_normalizado or "lanchonete" in nome_normalizado:
+        tipo = "F-8"
+    elif "zoologico" in nome_normalizado or "parque" in nome_normalizado:
+        tipo = "F-9"
+    elif "exposicao" in nome_normalizado:
+        tipo = "F-10"
+    else:
+        tipo = "Tipo de imóvel não identificado"
+
+    # Classificação de risco por altura
+    if h <= 1:
+        risco_altura = "Área de Risco I (Um pavimento)"
+    elif h <= 6:
+        risco_altura = "Área de Risco II (Altura ≤ 6 m)"
+    elif h <= 12:
+        risco_altura = "Área de Risco III (6 m < Altura ≤ 12 m)"
+    elif h <= 23:
+        risco_altura = "Área de Risco IV (12 m < Altura ≤ 23 m)"
+    elif h <= 30:
+        risco_altura = "Área de Risco V (23 m < Altura ≤ 30 m)"
+    else:
+        risco_altura = "Área de Risco VI (Altura > 30 m)"
+
+    # Classificação de risco quanto ao coeficiente de incêndio
+    if ci < 300:
+        risco_incendio = "Risco Baixo"
+    elif ci <= 1200:
+        risco_incendio = "Risco Médio"
+    else:
+        risco_incendio = "Risco Alto"
+
+    # Resultado final
+    return f"""
+    Nome do imóvel: {nome}
+    Tipo do imóvel: {tipo}
+    Área de risco por altura: {risco_altura}
+    Classificação de risco (CI): {risco_incendio}
+    """
+
+# Exemplo de uso
+nome_imovel = input("Digite o nome do imóvel: ")
+altura = float(input("Digite a altura do imóvel (em metros): "))
+area_construida = float(input("Digite a área construída (em metros quadrados): "))
+coeficiente_incendio = float(input("Digite o coeficiente de incêndio: "))
+leitos = None
+
+# Perguntar sobre o número de leitos se aplicável
+if "pensionato" in remover_acentos(nome_imovel.lower()) or "internato" in remover_acentos(nome_imovel.lower()):
+    leitos = int(input("Digite a quantidade de leitos: "))
+
+# Classificar
+resultado = classificar_imovel(nome_imovel, altura, area_construida, coeficiente_incendio, leitos)
+print(resultado)
